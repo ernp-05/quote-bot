@@ -79,14 +79,24 @@ async def quote_command(interaction: discord.Interaction):
         author_line = vn_display
 
     embed = discord.Embed(
-        description=f"__*{quote_text}*__\n\n— {author_line}",
+        description=f"# __*{quote_text}*__\n\n— {author_line}",
         color=discord.Color.blurple()
     )
 
+    file = None
     if char_image:
-        embed.set_thumbnail(url=char_image)
+        try:
+            img_response = requests.get(char_image, timeout=15)
+            if img_response.status_code == 200:
+                file = discord.File(fp=__import__("io").BytesIO(img_response.content), filename="character.jpg")
+                embed.set_thumbnail(url="attachment://character.jpg")
+        except Exception:
+            pass
 
-    await interaction.followup.send(embed=embed)
+    if file:
+        await interaction.followup.send(embed=embed, file=file)
+    else:
+        await interaction.followup.send(embed=embed)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
